@@ -8,6 +8,7 @@ import errorHandlerMiddleware from './middleware/errorHandler.middleware';
 import taskListRoutes from './routes/taskList.routes';
 import todoItemRoutes from './routes/todoItem.routes';
 import userRoutes from "./routes/user.routes";
+import http from 'http';
 
 const prisma = new PrismaClient();
 const app = express();
@@ -48,14 +49,19 @@ app.get(`/api/${API_VERSION}/health`, (req, res) => {
 
 app.use(errorHandlerMiddleware);
 
+
+const server = http.createServer(app);
+
 async function main() {
     try {
         await prisma.$connect();
         console.log('Connected to MongoDB via Prisma');
 
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
+        if (!server.listening) {
+            server.listen(PORT, () => {
+                console.log(`Server is running on port ${PORT}`);
+            });
+        }
     } catch (error) {
         console.error('Error connecting to MongoDB via Prisma:', error);
         process.exit(1);
@@ -64,4 +70,4 @@ async function main() {
 
 main();
 
-export default app;
+export default server;
